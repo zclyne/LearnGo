@@ -49,13 +49,22 @@ func (node *TreeNode) SetValue(value int) {
 
 // 中序遍历一棵树
 func (node *TreeNode) Traverse() {
+	// 传入的参数为打印node内容的函数
+	node.TraverseFunc(func(n *TreeNode) {
+		n.Print()
+	})
+	fmt.Println()
+}
+
+// 在遍历的同时执行函数内容，函数f作为参数传入
+func (node *TreeNode) TraverseFunc(f func(node *TreeNode)) {
 	if node == nil {
 		return
 	}
 	// 因为允许在nil上调用函数，所以这里不需要判断left和right是否为nil
-	node.left.Traverse()
-	node.Print()
-	node.right.Traverse()
+	node.left.TraverseFunc(f)
+	f(node)
+	node.right.TraverseFunc(f)
 }
 
 // 由于go中没有继承，若要扩展系统类型或其他包中的类型，需要使用别名或组合的方法
@@ -128,4 +137,11 @@ func main() {
 	myRoot := myTreeNode{&root}
 	myRoot.postOrder()
 	fmt.Println()
+
+	// 用函数式编程的方法计算节点数量
+	nodeCount := 0
+	root.TraverseFunc(func(node *TreeNode) {
+		nodeCount++
+	})
+	fmt.Println("Node count:", nodeCount)
 }

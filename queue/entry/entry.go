@@ -16,4 +16,8 @@ func main() {
 	q.Pop()
 	fmt.Println(q.IsEmpty()) // true
 	// 进行了一系列Push()和Pop()之后，q和原本的q不是同一个slice
+
+	// Queue可以支持任何类型
+	q.Push("abc")
+	fmt.Println(q.Pop())
 }

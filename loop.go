@@ -3,8 +3,10 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
+	"strings"
 )
 
 func convertToBin(n int) string {
@@ -25,7 +27,12 @@ func printFile(filename string) {
 	if err != nil {
 		panic(err)
 	}
-	scanner := bufio.NewScanner(file)
+
+	printFileContents(file)
+}
+
+func printFileContents(reader io.Reader) {
+	scanner := bufio.NewScanner(reader)
 	// 这里既没有起始条件，也没有递增条件，只有结束条件，可以直接省略分号
 	// 这就相当于while，所以go语言中并没有while
 	// scanner.Scan()每次读入一行
@@ -51,5 +58,15 @@ func main() {
 		convertToBin(0),
 	)
 	printFile("abc.txt")
-	forever()
+	// ``表示跨行字符串，并且可以包含引号
+	s := `abc"d"
+	kkkkk
+	123
+
+	p`
+	// 由于printFileContents()的参数是一个io.Reader，所以也可以像下面这样打印字符串
+	// 扩展性得到增强
+	printFileContents(strings.NewReader(s))
+
+	// forever()
 }
