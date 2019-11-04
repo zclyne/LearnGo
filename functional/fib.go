@@ -1,21 +1,12 @@
 package main
 
 import (
+	"LearnGo/functional/fib"
 	"bufio"
 	"fmt"
 	"io"
 	"strings"
 )
-
-// 使用闭包实现斐波那契数列的生成
-
-func fibonacci() intGen {
-	a, b := 0, 1
-	return func() int {
-		a, b = b, a + b
-		return a
-	}
-}
 
 // 为函数实现接口
 type intGen func() int
@@ -45,6 +36,6 @@ func printFileContents(reader io.Reader) {
 }
 
 func main() {
-	f := fibonacci()
+	var f intGen = fib.Fibonacci()
 	printFileContents(f)
 }

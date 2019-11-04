@@ -1,4 +1,4 @@
-package main
+package basic
 
 import (
 	"fmt"
@@ -116,16 +116,22 @@ func enums() {
 	fmt.Println(b, kb, mb, gb, tb, pb)
 }
 
-func main() {
-	fmt.Println("Hello world!")
-	variableZeroValue()
-	variableInitialValue()
-	variableTypeDeduction()
-	variableShorter()
-	fmt.Println(aa, ss, bb, cc, dd)
-
-	euler()
-	typeConversion()
-	consts()
-	enums()
+func calcTriangle(a, b int) int {
+	var c int
+	c = int(math.Sqrt(float64(a * a + b * b)))
+	return c
 }
+
+//func main() {
+//	fmt.Println("Hello world!")
+//	variableZeroValue()
+//	variableInitialValue()
+//	variableTypeDeduction()
+//	variableShorter()
+//	fmt.Println(aa, ss, bb, cc, dd)
+//
+//	euler()
+//	typeConversion()
+//	consts()
+//	enums()
+//}

@@ -8,7 +8,7 @@ import "fmt"
 // 导入其他的包要使用import语句，要使用相对导入，必须把要导入的包放在GOPATH/src下
 // 使用其他包中的类型时，需要用包名.方法名或包名.struct名字的方法
 
-// go中只有struct，没有class，只支持封装，而没有继承和多台
+// go中只有struct，没有class，只支持封装，而没有继承和多态
 // go采用面向接口编程
 type TreeNode struct {
 	value int
