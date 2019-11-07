@@ -4,6 +4,7 @@ import (
 	"LearnGo/errhandling/filelistingserver/filelisting"
 	"log"
 	"net/http"
+	_ "net/http/pprof" // 前面必须加下划线，表示需要load其中的一些帮主程序进来
 	"os"
 )
 

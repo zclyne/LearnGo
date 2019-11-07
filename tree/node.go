@@ -85,6 +85,19 @@ func (myNode *myTreeNode) postOrder() {
 	myNode.node.Print()
 }
 
+// 使用channel进行树的遍历，这里采用了指针接收者的方式，调用时的语法为node.TraverseWithChannel()
+func (node *TreeNode) TraverseWithChannel() chan *TreeNode {
+	out := make(chan *TreeNode)
+	go func() {
+		// 按中序遍历的方式把树中的节点都放到channel中
+		node.TraverseFunc(func(node *TreeNode) {
+			out <- node
+		})
+		close(out)
+	}()
+	return out
+}
+
 func main() {
 	// 创建treenode
 	var root TreeNode // value = 0, left = right = nil
@@ -144,4 +157,15 @@ func main() {
 		nodeCount++
 	})
 	fmt.Println("Node count:", nodeCount)
+
+	// 使用channel遍历树，这种方法显得更加序列化一些
+	// 不断地从channel中取出节点，然后判断其大小与当前最大值的关系
+	c := root.TraverseWithChannel()
+	maxNode := 0
+	for node := range c {
+		if node.value > maxNode {
+			maxNode = node.value
+		}
+	}
+	fmt.Println("Max node value:", maxNode)
 }
