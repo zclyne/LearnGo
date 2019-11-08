@@ -9,10 +9,20 @@ import (
 // 根据url访问页面，并返回网页内容
 func Fetch(url string) ([]byte, error) {
 	// 访问url
-	resp, err:= http.Get(url)
+	// resp, err:= http.Get(url) // 直接get现在已经失效，因为网站做了反爬虫处理
+	// 这里采用在header中加入User-Agent字段的方法来防止403 forbidden
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/71.0.3578.87 Safari/537.21")
+	client := http.Client{
+		//CheckRedirect: func(req *http.Request, via []*http.Request) error {
+		//	fmt.Println("Redirect:", req)
+		//	return nil
+		//},
+	}
+	resp, err := client.Do(req)
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK { // 访问出错,打印response的code

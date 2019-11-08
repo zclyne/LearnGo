@@ -21,13 +21,17 @@ func ParseCityList(contents []byte) engine.ParseResult {
 	// 其中最后一个[]byte是一个string，所以其效果和FindAllStringSubmatch返回的[][]stirng是相同的
 	matches := re.FindAllSubmatch(contents, -1)
 	result := engine.ParseResult{}
+	//limit := 10 // 最多允许爬取的城市数
 	for _, m := range matches { // 处理每一个match到的城市
-		result.Items = append(result.Items, string(m[2])) // 城市名字放在Items中
+		result.Items = append(result.Items, "City " + string(m[2])) // 城市名字放在Items中
 		result.Requests = append(result.Requests, engine.Request{ // 城市url放入Requests中
 			Url:        string(m[1]),
-			ParserFunc: engine.NilParser,
+			ParserFunc: ParseCity,
 		})
-		// fmt.Printf("City: %s, URL: %s\n", m[2], m[1])
+		//limit--
+		//if limit == 0 {
+		//	break
+		//}
 	}
 	// fmt.Println("Number of cities altogether:", len(matches)) // 470
 	return result
