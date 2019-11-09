@@ -7,17 +7,18 @@ import (
 
 // 针对某一城市的Parser，获取城市下所有用户的信息
 
-// 提取用户页面链接的正则表达式
-const cityRe = `<a href="(http://album.zhenai.com/u/[0-9]+)"[^>]*>([^<]+)</a>`
-const genderRe = `<td[^>]+><span[^>]+>性别：</span>([^>]+)</td>`
+// 用户详细信息页面链接
+var profileRe = regexp.MustCompile(`<a href="(http://album.zhenai.com/u/[0-9]+)"[^>]*>([^<]+)</a>`)
+// 用户性别信息
+var genderRe = regexp.MustCompile(`<td[^>]+><span[^>]+>性别：</span>([^>]+)</td>`)
+// 下一页和其他相关链接
+var cityUrlRe = regexp.MustCompile(`href="(http://www.zhenai.com/zhenghun/[^"]+)"`)
 
 func ParseCity(contents []byte) engine.ParseResult {
 	// 匹配用户名
-	re := regexp.MustCompile(cityRe)
-	userMatches := re.FindAllSubmatch(contents, -1)
+	userMatches := profileRe.FindAllSubmatch(contents, -1)
 	// 匹配用户性别
-	re = regexp.MustCompile(genderRe)
-	genderMatches := re.FindAllSubmatch(contents, -1)
+	genderMatches := genderRe.FindAllSubmatch(contents, -1)
 	result := engine.ParseResult{}
 	for i, m := range userMatches { // 处理每一个match到的用户
 		// 这里必须把要用到的url、name和gender都拷贝出来，因为ParseFunc并不是立即执行的，而当它执行时
@@ -37,5 +38,16 @@ func ParseCity(contents []byte) engine.ParseResult {
 			},
 		})
 	}
+
+	// 匹配下一页链接和其他相关页面链接
+	cityUrlMatches := cityUrlRe.FindAllSubmatch(contents, -1)
+	for _, m := range cityUrlMatches {
+		cityUrl := string(m[1])
+		result.Requests = append(result.Requests, engine.Request{
+			Url:        cityUrl,
+			ParserFunc: ParseCity,
+		})
+	}
+
 	return result
 }

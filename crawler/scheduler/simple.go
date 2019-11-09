@@ -10,11 +10,23 @@ type SimpleScheduler struct {
 	workerChan chan engine.Request
 }
 
-// 由于会改变struct内部的内容，所以这里要使用指针接收者
-func (s *SimpleScheduler) ConfigureMasterWorkerChan(c chan engine.Request) {
-	s.workerChan = c
+// 在SimpleScheduler中，所有worker共享一个channel
+// 所以这里直接返回s.workerChan，就是worker用来接收request的channel
+func (s *SimpleScheduler) WorkerChan() chan engine.Request {
+	return s.workerChan
 }
 
+func (s *SimpleScheduler) WorkerReady(chan engine.Request) {
+}
+
+// 由于会改变struct内部的内容，所以这里要使用指针接收者
+func (s *SimpleScheduler) Run() {
+	s.workerChan = make(chan engine.Request)
+}
+
+// submit必须另开一个goroutine来把r放入workerChan中，否则会造成死锁
 func (s *SimpleScheduler) Submit(r engine.Request) {
-	s.workerChan <- r
+	go func() {
+		s.workerChan <- r
+	}()
 }

@@ -4,10 +4,19 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
+
+// 限流器，防止爬虫爬取速度太快，触发目标网页的反爬虫机制
+// 每100毫秒执行一次fetch
+// 所有的worker都会使用同一个rateLimiter，worker总数由engine中的WorkerCount指定
+var rateLimiter = time.Tick(10 * time.Millisecond)
 
 // 根据url访问页面，并返回网页内容
 func Fetch(url string) ([]byte, error) {
+	//先等待rateLimiter中有信号接收到，然后再执行实际的爬取
+	<- rateLimiter
+
 	// 访问url
 	// resp, err:= http.Get(url) // 直接get现在已经失效，因为网站做了反爬虫处理
 	// 这里采用在header中加入User-Agent字段的方法来防止403 forbidden

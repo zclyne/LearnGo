@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"LearnGo/crawler/model"
 	"log"
 )
 
@@ -14,53 +15,73 @@ type ConcurrentEngine struct{
 }
 
 type Scheduler interface {
+	ReadyNotifier
 	Submit(Request)
-	ConfigureMasterWorkerChan(chan Request)
+	WorkerChan() chan Request
+	Run()
+}
+
+// 原本的WorkerReady()是Scheduler的一个方法，但是这样Scheduler太大了
+// 所以单独分离出一个ReadyNotifier
+type ReadyNotifier interface {
+	WorkerReady(chan Request)
 }
 
 func (e *ConcurrentEngine) Run(seeds ...Request) {
-	// 创建与worker通信的channel，输入为Request，输出为ParseResult
-	in := make(chan Request)
+	// QueuedScheduler初始化并开始运行
 	out := make(chan ParseResult)
-
-	// 将输入channel配置到scheduler，scheduler负责调度requests给worker
-	e.Scheduler.ConfigureMasterWorkerChan(in)
+	e.Scheduler.Run()
 
 	// 创建worker，并将先前创建的channel与worker连接上
 	for i := 0; i < e.WorkerCount; i++ {
-		createWorker(in, out)
+		// e.Scheduler.WorkerChan()是scheduler内部的channel
+		// 对于SimpleScheduler，所有worker共享一个chan
+		// 而对于QueuedScheduler，每一个worker有自己独立的chan
+		// 由于e.Scheduler中包含了ReadyNotifier，所以这里仍然可以直接传入e.Scheduler
+		createWorker(e.Scheduler.WorkerChan(), out, e.Scheduler)
 	}
 
 	// 把种子页面发送给scheduler，开始调度
 	for _, r := range seeds {
+		// 判断种子页面中是否有重复
+		if isDuplicate(r.Url) {
+			log.Printf("Duplicate request: " + "%s", r.Url)
+			continue
+		}
 		e.Scheduler.Submit(r)
 	}
 
+	profileCount := 0
 	// 无穷循环
 	for {
 		// 从输出管道中获取各个worker执行的结果
 		result := <- out
 		for _, item := range result.Items {
-			log.Printf("Got item: %v", item)
+			// 把item转换为Profile，用于判断这个item是否是一个用户的详细信息
+			// 如果是用户信息，打印log并计数
+			if _, ok := item.(model.Profile); ok {
+				log.Printf("Got item #%d: %v", profileCount, item)
+				profileCount++
+			}
 		}
 
 		// 把所有获得的request再次送给scheduler
 		for _, request := range result.Requests {
+			// 判断url是否重复出现
+			if isDuplicate(request.Url) {
+				continue
+			}
 			e.Scheduler.Submit(request)
 		}
 	}
 }
 
 // 创建并发worker的goroutine
-func createWorker(in chan Request, out chan ParseResult) {
+func createWorker(in chan Request, out chan ParseResult, ready ReadyNotifier) {
 	go func() {
 		for {
-			// 下面这种写法会造成循环等待，从而死锁
-			// scheduler必须找到空闲的worker才能执行request
-			// 但是有空闲worker的前提是这个worker已经把发给自己的上一个request做完
-			// 注意Run函数中的无穷循环部分
-			// 从out中接收数据的前提是上一轮循环中，result中的requests都已经提交给scheduler
-			// 而成功提交的前提是必须有空闲的worker来接收
+			// 告知scheduler本worker已经ready
+			ready.WorkerReady(in)
 			request := <- in
 			result, err := worker(request) // 调用simple.go中的worker方法来访问网页并解析结果
 			if err != nil {
@@ -69,4 +90,15 @@ func createWorker(in chan Request, out chan ParseResult) {
 			out <- result
 		}
 	}()
+}
+
+// URL重复性判断
+var visitedUrls = make(map[string]bool)
+func isDuplicate(url string) bool {
+	if visitedUrls[url] { // 已经访问过这个url
+		return true
+	}
+	// 没有访问过这个url，把它存进map
+	visitedUrls[url] = true
+	return false
 }
