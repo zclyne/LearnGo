@@ -18,9 +18,10 @@ var ancestralHomeRe = regexp.MustCompile(`div[^>]*>籍贯:([^<]+)</div>`)
 var incomeRe = regexp.MustCompile(`<div[^>]*>月收入:([^<]+)</div>`)
 var educationRe = regexp.MustCompile(`<div[^>]*>(高中及以下|中专|大专|大学本科|硕士|博士)</div>`)
 var marriageRe = regexp.MustCompile(`<div[^>]*>(未婚|离异|丧偶)</div>`)
+var idUrlRe = regexp.MustCompile(`https?://album.zhenai.com/u/([\d]+)`)
 
 // 第二、三个参数是从city的parser那边传来的用户的名称和性别
-func ParseProfile(contents []byte, name string, gender string) engine.ParseResult {
+func ParseProfile(contents []byte, url string, name string, gender string) engine.ParseResult {
 	// 创建用户profile
 	profile := model.Profile{
 		Name:          "",
@@ -65,7 +66,14 @@ func ParseProfile(contents []byte, name string, gender string) engine.ParseResul
 	profile.Gender = gender
 
 	result := engine.ParseResult{
-		Items: []interface{}{profile},
+		Items: []engine.Item{
+			{
+				Id: extractString([]byte(url), idUrlRe),
+				Url: url,
+				Type: "zhenai",
+				Payload: profile,
+			},
+		},
 	}
 	return result
 }

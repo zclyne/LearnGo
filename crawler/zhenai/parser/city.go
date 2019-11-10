@@ -28,13 +28,12 @@ func ParseCity(contents []byte) engine.ParseResult {
 		name := string(m[2])
 		gender := string(genderMatches[i][1])
 
-		result.Items = append(result.Items, "User " + name) // 用户名字名字放在Items中
 		result.Requests = append(result.Requests, engine.Request{ // 用户页面url放入Requests中
 			Url:        url,
 			// 函数式编程方法，包装一下有多个参数的ParseProfile，实际调用ParseProfile时
 			// 还要传入这里获得的用户名字和性别
 			ParserFunc: func(c []byte) engine.ParseResult {
-				return ParseProfile(c, name, gender)
+				return ParseProfile(c, url, name, gender)
 			},
 		})
 	}

@@ -23,7 +23,6 @@ func ParseCityList(contents []byte) engine.ParseResult {
 	result := engine.ParseResult{}
 	//limit := 10 // 最多允许爬取的城市数
 	for _, m := range matches { // 处理每一个match到的城市
-		result.Items = append(result.Items, "City " + string(m[2])) // 城市名字放在Items中
 		result.Requests = append(result.Requests, engine.Request{ // 城市url放入Requests中
 			Url:        string(m[1]),
 			ParserFunc: ParseCity,

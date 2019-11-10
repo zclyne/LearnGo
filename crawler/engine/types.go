@@ -13,7 +13,17 @@ type Request struct {
 // Items中包含所有的城市名
 type ParseResult struct {
 	Requests []Request
-	Items []interface{} // Items可以是任何类型
+	Items []Item // Items中的元素必须是Item类型
+}
+
+// id、type和url是各种不同爬虫所爬取的内容都应该具有的公共部分，所以把它抽象出来放入type中
+// type是特定爬虫所爬取的内容类型信息，此处是"zhenai"，表示爬的网站
+// Payload则是因爬虫不同而异的数据部分，例如此处就是用户的Profile
+type Item struct {
+	Url string
+	Id string
+	Type string
+	Payload interface{}
 }
 
 func NilParser([]byte) ParseResult {

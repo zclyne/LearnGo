@@ -24,28 +24,16 @@ func TestParseCityList(t *testing.T) {
 		"http://www.zhenai.com/zhenghun/akesu",
 		"http://www.zhenai.com/zhenghun/alashanmeng",
 	}
-	expectedCities := []string {
-		"City 阿坝", "City 阿克苏", "City 阿拉善盟",
-	}
 
 	// 验证数量是否正确
 	if len(result.Requests) != resultSize {
 		t.Errorf("result.Requests should have %d requests, but had %d", resultSize, len(result.Requests))
-	}
-	if len(result.Items) != resultSize {
-		t.Errorf("result.Items should have %d requests, but had %d", resultSize, len(result.Items))
 	}
 
 	// 验证城市url和城市名是否正确
 	for i, url := range expectedUrls {
 		if result.Requests[i].Url != url {
 			t.Errorf("expted url #%d: %s, but was %s", i, url, result.Requests[i].Url)
-		}
-	}
-	for i, city := range expectedCities {
-		// 注意这里要把Items[i]强转成string，因为Items定义上是interface{}
-		if result.Items[i].(string) != city {
-			t.Errorf("expted city #%d: %s, but was %s", i, city, result.Items[i].(string))
 		}
 	}
 

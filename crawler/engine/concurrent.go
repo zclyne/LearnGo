@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"learngo.com/crawler/model"
 	"log"
 )
 
@@ -12,7 +11,7 @@ import (
 type ConcurrentEngine struct{
 	Scheduler Scheduler
 	WorkerCount int
-	ItemChan chan interface{} // 用于爬取的信息持久化的channel，与ItemSaver通信
+	ItemChan chan Item // 用于爬取的信息持久化的channel，与ItemSaver通信
 }
 
 type Scheduler interface {
@@ -57,14 +56,10 @@ func (e *ConcurrentEngine) Run(seeds ...Request) {
 		// 从输出管道中获取各个worker执行的结果
 		result := <- out
 		for _, item := range result.Items {
-			// 把item转换为Profile，用于判断这个item是否是一个用户的详细信息
-			// 如果是用户信息，打印log并计数
-			if profile, ok := item.(model.Profile); ok {
-				// 把获取到的用户送往ItemSaver
-				go func(p model.Profile) { // 这里要用传参的方式把p传入，否则会出现变量作用域问题
-					e.ItemChan <- p
-				}(profile)
-			}
+			// 把获取到的用户送往ItemSaver
+			go func(item Item) { // 这里要用传参的方式把p传入，否则会出现变量作用域问题
+				e.ItemChan <- item
+			}(item)
 		}
 
 		// 把所有获得的request再次送给scheduler
@@ -85,7 +80,7 @@ func createWorker(in chan Request, out chan ParseResult, ready ReadyNotifier) {
 			// 告知scheduler本worker已经ready
 			ready.WorkerReady(in)
 			request := <- in
-			result, err := worker(request) // 调用simple.go中的worker方法来访问网页并解析结果
+			result, err := worker(request) // 调用worker方法来访问网页并解析结果
 			if err != nil {
 				continue
 			}
