@@ -1,9 +1,10 @@
 package main
 
 import (
-	"LearnGo/crawler/engine"
-	"LearnGo/crawler/scheduler"
-	"LearnGo/crawler/zhenai/parser"
+	"learngo.com/crawler/engine"
+	"learngo.com/crawler/persist"
+	"learngo.com/crawler/scheduler"
+	"learngo.com/crawler/zhenai/parser"
 )
 
 func main() {
@@ -12,6 +13,7 @@ func main() {
 	e := engine.ConcurrentEngine{
 		Scheduler: &scheduler.QueuedScheduler{},
 		WorkerCount: 10,
+		ItemChan: persist.ItemSaver(),
 	}
 
 	e.Run(engine.Request{

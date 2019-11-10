@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"LearnGo/crawler/model"
+	"learngo.com/crawler/model"
 	"io/ioutil"
 	"testing"
 )

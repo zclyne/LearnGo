@@ -1,7 +1,7 @@
 package engine
 
 import (
-	"LearnGo/crawler/fetcher"
+	"learngo.com/crawler/fetcher"
 	"log"
 )
 

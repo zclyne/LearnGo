@@ -1,8 +1,8 @@
 package parser
 
 import (
-	"LearnGo/crawler/engine"
-	"LearnGo/crawler/model"
+	"learngo.com/crawler/engine"
+	"learngo.com/crawler/model"
 	"regexp"
 	"strconv"
 )

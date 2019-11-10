@@ -1,7 +1,7 @@
 package engine
 
 import (
-	"LearnGo/crawler/model"
+	"learngo.com/crawler/model"
 	"log"
 )
 
@@ -12,6 +12,7 @@ import (
 type ConcurrentEngine struct{
 	Scheduler Scheduler
 	WorkerCount int
+	ItemChan chan interface{} // 用于爬取的信息持久化的channel，与ItemSaver通信
 }
 
 type Scheduler interface {
@@ -51,7 +52,6 @@ func (e *ConcurrentEngine) Run(seeds ...Request) {
 		e.Scheduler.Submit(r)
 	}
 
-	profileCount := 0
 	// 无穷循环
 	for {
 		// 从输出管道中获取各个worker执行的结果
@@ -59,9 +59,11 @@ func (e *ConcurrentEngine) Run(seeds ...Request) {
 		for _, item := range result.Items {
 			// 把item转换为Profile，用于判断这个item是否是一个用户的详细信息
 			// 如果是用户信息，打印log并计数
-			if _, ok := item.(model.Profile); ok {
-				log.Printf("Got item #%d: %v", profileCount, item)
-				profileCount++
+			if profile, ok := item.(model.Profile); ok {
+				// 把获取到的用户送往ItemSaver
+				go func(p model.Profile) { // 这里要用传参的方式把p传入，否则会出现变量作用域问题
+					e.ItemChan <- p
+				}(profile)
 			}
 		}
 

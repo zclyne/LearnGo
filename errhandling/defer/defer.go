@@ -1,7 +1,7 @@
 package main
 
 import (
-	"LearnGo/functional/fib"
+	"learngo.com/functional/fib"
 	"bufio"
 	"fmt"
 	"os"

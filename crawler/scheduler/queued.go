@@ -1,6 +1,6 @@
 package scheduler
 
-import "LearnGo/crawler/engine"
+import "learngo.com/crawler/engine"
 
 // 具有request队列和worker队列的scheduler
 

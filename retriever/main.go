@@ -1,8 +1,8 @@
 package main
 
 import (
-	"LearnGo/retriever/mock"
-	"LearnGo/retriever/real"
+	"learngo.com/retriever/mock"
+	"learngo.com/retriever/real"
 	"fmt"
 	"time"
 )

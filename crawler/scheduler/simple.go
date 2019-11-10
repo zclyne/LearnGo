@@ -1,6 +1,6 @@
 package scheduler
 
-import "LearnGo/crawler/engine"
+import "learngo.com/crawler/engine"
 
 // SimpleScheduler，实现了scheduler接口
 // 所有worker都连接在workerChan上，而SimpleScheduler简单的把接收到的request放到这个channel上
