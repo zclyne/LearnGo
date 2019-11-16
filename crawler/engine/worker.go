@@ -6,7 +6,7 @@ import (
 )
 
 func worker(r Request) (ParseResult, error) {
-	// log.Printf("Fetching %s", r.Url)
+	log.Printf("Fetching %s", r.Url)
 	body, err := fetcher.Fetch(r.Url)
 	if err != nil {
 		log.Printf("Fetcher: error fecthing url %s: %v", r.Url, err)
@@ -14,5 +14,5 @@ func worker(r Request) (ParseResult, error) {
 	}
 
 	// 把获得的内容交由Parser来解析
-	return r.ParserFunc(body), nil
+	return r.Parser.Parse(body, r.Url), nil
 }

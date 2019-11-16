@@ -35,7 +35,7 @@ func TestSave(t *testing.T) {
 
 	const index = "dating_test"
 	// 把profile插入到ElasticSearch中
-	err = save(client, index, expected)
+	err = Save(client, index, expected)
 	if err != nil {
 		panic(err)
 	}

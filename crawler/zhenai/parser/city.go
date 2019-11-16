@@ -32,9 +32,7 @@ func ParseCity(contents []byte) engine.ParseResult {
 			Url:        url,
 			// 函数式编程方法，包装一下有多个参数的ParseProfile，实际调用ParseProfile时
 			// 还要传入这里获得的用户名字和性别
-			ParserFunc: func(c []byte) engine.ParseResult {
-				return ParseProfile(c, url, name, gender)
-			},
+			Parser: NewProfileParser(name, gender),
 		})
 	}
 
@@ -44,7 +42,7 @@ func ParseCity(contents []byte) engine.ParseResult {
 		cityUrl := string(m[1])
 		result.Requests = append(result.Requests, engine.Request{
 			Url:        cityUrl,
-			ParserFunc: ParseCity,
+			Parser: engine.NewFuncParser(ParseCity, "ParseCity"),
 		})
 	}
 

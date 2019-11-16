@@ -23,7 +23,7 @@ func ItemSaver(index string) (chan engine.Item, error) {
 			item := <- out
 			log.Printf("Item Saver: got item #%d: %v", itemCount, item)
 			itemCount++
-			err := save(client, index, item)
+			err := Save(client, index, item)
 			if err != nil { // 由于爬虫爬取的数据非常多，所以出现一个存储错误问题不大
 				log.Printf("Item Saver: error saving item %v: %v", item, err)
 			}
@@ -33,7 +33,7 @@ func ItemSaver(index string) (chan engine.Item, error) {
 }
 
 // 把item存入ElasticSearch，返回error
-func save(client *elastic.Client, index string, item engine.Item) error {
+func Save(client *elastic.Client, index string, item engine.Item) error {
 	if item.Type == "" {
 		return errors.New("Must supply Type")
 	}

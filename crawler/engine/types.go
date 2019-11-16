@@ -2,10 +2,48 @@ package engine
 
 // 统一定义所使用的类型
 
+type ParserFunc func(contents []byte) ParseResult
+
 // request结构体包含要访问的url，以及用来解析该url内容的parser
 type Request struct {
 	Url string
-	ParserFunc func([]byte) ParseResult
+	Parser Parser
+}
+
+// Parser接口负责包装原本的ParserFunc，用于完成在分布式节点之间传输ParserFunc的功能
+type Parser interface {
+	Parse(contents []byte, url string) ParseResult
+	Serialize() (name string, args interface{})
+}
+
+type NilParser struct {}
+
+func (n NilParser) Parse(contents []byte, url string) ParseResult {
+	return ParseResult{}
+}
+
+func (n NilParser) Serialize() (name string, args interface{}) {
+	return "NilParser", nil
+}
+
+type FuncParser struct {
+	parser ParserFunc
+	Name string
+}
+
+func (f *FuncParser) Parse(contents []byte, url string) ParseResult {
+	return f.parser(contents)
+}
+
+func (f *FuncParser) Serialize() (name string, args interface{}) {
+	return f.Name, nil
+}
+
+func NewFuncParser(p ParserFunc, name string) *FuncParser {
+	return &FuncParser {
+		parser: p,
+		Name: name,
+	}
 }
 
 // ParseResult中包含所有该页面下的待访问的链接，以及相应的项目名
@@ -24,8 +62,4 @@ type Item struct {
 	Id string
 	Type string
 	Payload interface{}
-}
-
-func NilParser([]byte) ParseResult {
-	return ParseResult{}
 }

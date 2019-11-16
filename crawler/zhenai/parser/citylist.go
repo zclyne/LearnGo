@@ -2,6 +2,7 @@ package parser
 
 import (
 	"learngo.com/crawler/engine"
+	"log"
 	"regexp"
 )
 
@@ -12,6 +13,7 @@ const cityListRe = `<a href="(http://www.zhenai.com/zhenghun/[0-9a-z]+)"[^>]*>([
 
 // 城市列表页的解析器
 func ParseCityList(contents []byte) engine.ParseResult {
+	log.Printf("Parsing City List...")
 	re := regexp.MustCompile(cityListRe)
 
 	// 执行匹配，返回值matches是[][]byte，其中每个[]byte都是一个城市对应的a标签字符串
@@ -25,7 +27,7 @@ func ParseCityList(contents []byte) engine.ParseResult {
 	for _, m := range matches { // 处理每一个match到的城市
 		result.Requests = append(result.Requests, engine.Request{ // 城市url放入Requests中
 			Url:        string(m[1]),
-			ParserFunc: ParseCity,
+			Parser: engine.NewFuncParser(ParseCity, "ParseCity"),
 		})
 		//limit--
 		//if limit == 0 {

@@ -3,6 +3,7 @@ package parser
 import (
 	"learngo.com/crawler/engine"
 	"learngo.com/crawler/model"
+	"log"
 	"regexp"
 	"strconv"
 )
@@ -21,7 +22,7 @@ var marriageRe = regexp.MustCompile(`<div[^>]*>(未婚|离异|丧偶)</div>`)
 var idUrlRe = regexp.MustCompile(`https?://album.zhenai.com/u/([\d]+)`)
 
 // 第二、三个参数是从city的parser那边传来的用户的名称和性别
-func ParseProfile(contents []byte, url string, name string, gender string) engine.ParseResult {
+func parseProfile(contents []byte, url string, name string, gender string) engine.ParseResult {
 	// 创建用户profile
 	profile := model.Profile{
 		Name:          "",
@@ -65,6 +66,8 @@ func ParseProfile(contents []byte, url string, name string, gender string) engin
 	profile.Name = name
 	profile.Gender = gender
 
+	log.Printf("Parsing User Profile...")
+
 	result := engine.ParseResult{
 		Items: []engine.Item{
 			{
@@ -85,4 +88,26 @@ func extractString(contents []byte, re *regexp.Regexp) string {
 		return string(match[1]) // match[1]是匹配到的字符串对应的正则表达式括号内部的内容
 	}
 	return ""
+}
+
+// 由于parseProfile有额外的参数name和gender，所以不能简单地使用types.go中定义的FuncParser
+// 这里又定义了结构体ProfileParser，并把name和gender作为结构体内部的数据
+type ProfileParser struct {
+	userName string
+	userGender string
+}
+
+func (p *ProfileParser) Parse(contents []byte, url string) engine.ParseResult {
+	return parseProfile(contents, url, p.userName, p.userGender)
+}
+
+func (p *ProfileParser) Serialize() (name string, args interface{}) {
+	return "ProfileParser", []string{p.userName, p.userGender}
+}
+
+func NewProfileParser(name string, gender string) *ProfileParser {
+	return &ProfileParser{
+		userName: name,
+		userGender: gender,
+	}
 }
