@@ -80,7 +80,7 @@ func createWorker(in chan Request, out chan ParseResult, ready ReadyNotifier) {
 			// 告知scheduler本worker已经ready
 			ready.WorkerReady(in)
 			request := <- in
-			result, err := worker(request) // 调用worker方法来访问网页并解析结果
+			result, err := Worker(request) // 调用worker方法来访问网页并解析结果
 			if err != nil {
 				continue
 			}

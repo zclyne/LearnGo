@@ -5,6 +5,7 @@ import (
 	"learngo.com/crawler/persist"
 	"learngo.com/crawler/scheduler"
 	"learngo.com/crawler/zhenai/parser"
+	"learngo.com/crawler_distributed/config"
 )
 
 func main() {
@@ -24,7 +25,7 @@ func main() {
 
 	e.Run(engine.Request{
 		Url:        "http://www.zhenai.com/zhenghun", // 种子页面为城市列表页
-		Parser: engine.NewFuncParser(parser.ParseCityList, "ParseCityList"), // 城市列表页的对应Parser
+		Parser: engine.NewFuncParser(parser.ParseCityList, config.ParseCityList), // 城市列表页的对应Parser
 	})
 
 }

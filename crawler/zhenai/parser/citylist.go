@@ -2,6 +2,7 @@ package parser
 
 import (
 	"learngo.com/crawler/engine"
+	"learngo.com/crawler_distributed/config"
 	"log"
 	"regexp"
 )
@@ -27,7 +28,7 @@ func ParseCityList(contents []byte) engine.ParseResult {
 	for _, m := range matches { // 处理每一个match到的城市
 		result.Requests = append(result.Requests, engine.Request{ // 城市url放入Requests中
 			Url:        string(m[1]),
-			Parser: engine.NewFuncParser(ParseCity, "ParseCity"),
+			Parser: engine.NewFuncParser(ParseCity, config.ParseCity),
 		})
 		//limit--
 		//if limit == 0 {

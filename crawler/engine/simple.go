@@ -24,7 +24,7 @@ func (e SimpleEngine) Run(seeds ...Request) {
 		requests = requests[1:]
 
 		// 把request交由worker来进行取网页内容和解析
-		parseResult, err := worker(r)
+		parseResult, err := Worker(r)
 		if err != nil {
 			continue
 		}

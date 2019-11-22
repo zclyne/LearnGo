@@ -1,5 +1,7 @@
 package engine
 
+import "learngo.com/crawler_distributed/config"
+
 // 统一定义所使用的类型
 
 type ParserFunc func(contents []byte) ParseResult
@@ -23,7 +25,7 @@ func (n NilParser) Parse(contents []byte, url string) ParseResult {
 }
 
 func (n NilParser) Serialize() (name string, args interface{}) {
-	return "NilParser", nil
+	return config.NilParser, nil
 }
 
 type FuncParser struct {
