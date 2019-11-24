@@ -102,7 +102,7 @@ func (p *ProfileParser) Parse(contents []byte, url string) engine.ParseResult {
 }
 
 func (p *ProfileParser) Serialize() (name string, args interface{}) {
-	return "ProfileParser", []string{p.userName, p.userGender}
+	return "ParseProfile", []string{p.userName, p.userGender}
 }
 
 func NewProfileParser(name string, gender string) *ProfileParser {

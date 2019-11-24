@@ -6,12 +6,18 @@ import (
 	"learngo.com/crawler/scheduler"
 	"learngo.com/crawler/zhenai/parser"
 	"learngo.com/crawler_distributed/config"
-	"learngo.com/crawler_distributed/persist/client"
+	itemsaver "learngo.com/crawler_distributed/persist/client"
+	worker "learngo.com/crawler_distributed/worker/client"
 )
 
 func main() {
 
-	itemChan, err := client.ItemSaver(fmt.Sprintf(":%d", config.ItemSaverPort))
+	itemChan, err := itemsaver.ItemSaver(fmt.Sprintf(":%d", config.ItemSaverPort))
+	if err != nil {
+		panic(err)
+	}
+
+	processor, err := worker.CreateProcessor()
 	if err != nil {
 		panic(err)
 	}
@@ -21,11 +27,15 @@ func main() {
 		Scheduler: &scheduler.QueuedScheduler{},
 		WorkerCount: 10,
 		ItemChan: itemChan,
+		RequestProcessor: processor,
 	}
 
 	e.Run(engine.Request{
-		Url:        "http://www.zhenai.com/zhenghun", // 种子页面为城市列表页
-		ParserFunc: parser.ParseCityList, // 城市列表页的对应Parser
+		Url: "http://www.zhenai.com/zhenghun", // 种子页面为城市列表页
+		Parser: engine.NewFuncParser(
+			parser.ParseCityList,
+			config.ParseCityList,
+		), // 城市列表页的对应Parser
 	})
 
 }

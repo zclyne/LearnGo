@@ -12,7 +12,10 @@ type ConcurrentEngine struct{
 	Scheduler Scheduler
 	WorkerCount int
 	ItemChan chan Item // 用于爬取的信息持久化的channel，与ItemSaver通信
+	RequestProcessor Processor
 }
+
+type Processor func (r Request) (ParseResult, error)
 
 type Scheduler interface {
 	ReadyNotifier
@@ -38,7 +41,7 @@ func (e *ConcurrentEngine) Run(seeds ...Request) {
 		// 对于SimpleScheduler，所有worker共享一个chan
 		// 而对于QueuedScheduler，每一个worker有自己独立的chan
 		// 由于e.Scheduler中包含了ReadyNotifier，所以这里仍然可以直接传入e.Scheduler
-		createWorker(e.Scheduler.WorkerChan(), out, e.Scheduler)
+		e.createWorker(e.Scheduler.WorkerChan(), out, e.Scheduler)
 	}
 
 	// 把种子页面发送给scheduler，开始调度
@@ -74,13 +77,15 @@ func (e *ConcurrentEngine) Run(seeds ...Request) {
 }
 
 // 创建并发worker的goroutine
-func createWorker(in chan Request, out chan ParseResult, ready ReadyNotifier) {
+func (e *ConcurrentEngine) createWorker(in chan Request, out chan ParseResult, ready ReadyNotifier) {
 	go func() {
 		for {
 			// 告知scheduler本worker已经ready
 			ready.WorkerReady(in)
 			request := <- in
-			result, err := Worker(request) // 调用worker方法来访问网页并解析结果
+			// result, err := Worker(request) // 调用worker方法来访问网页并解析结果
+			// 调用rpc来执行worker
+			result, err := e.RequestProcessor(request)
 			if err != nil {
 				continue
 			}

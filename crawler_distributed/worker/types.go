@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"errors"
 	"learngo.com/crawler/engine"
 	"learngo.com/crawler/zhenai/parser"
 	"learngo.com/crawler_distributed/config"
@@ -65,9 +66,9 @@ func deserializeParser(p SerializedParser) (engine.Parser, error) {
 	case config.ParseCity:
 		return engine.NewFuncParser(parser.ParseCity, config.ParseCity), nil
 	case config.ParseProfile:
-		// p.Args是一个[]string类型，其中第一个是username，第二个是usergender
-		}
-		return parser.NewProfileParser(p.Args.([]string)[0], p.Args.([]string)[1]), nil
+		// p.Args是一个[]interface{}类型，要先把p.Args转成[]interface{}
+		// 然后分别取其[0]和[1]，再转换成string。其中第一个是username，第二个是usergender
+		return parser.NewProfileParser(p.Args.([]interface{})[0].(string), p.Args.([]interface{})[1].(string)), nil
 	case config.NilParser:
 		return engine.NilParser{}, nil
 	default:
