@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/olivere/elastic/v7"
 	"learngo.com/crawler_distributed/config"
@@ -10,8 +11,16 @@ import (
 
 // ItemSaver RPC的服务器端，负责接收rpc调用并将item存储到ElasticSearch中
 
+// 命令行参数
+var port = flag.Int("port", 0, "The port for me to listen on")
+
 func main() {
-	err := serveRpc(fmt.Sprintf(":%d", config.ItemSaverPort), config.ElasticIndex)
+	flag.Parse()
+	if *port == 0 {
+		fmt.Println("must specify a port")
+		return
+	}
+	err := serveRpc(fmt.Sprintf(":%d", *port), config.ElasticIndex)
 	if err != nil {
 		panic(err)
 	}

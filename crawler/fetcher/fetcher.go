@@ -3,6 +3,7 @@ package fetcher
 import (
 	"fmt"
 	"io/ioutil"
+	"learngo.com/crawler_distributed/config"
 	"net/http"
 	"time"
 )
@@ -10,7 +11,7 @@ import (
 // 限流器，防止爬虫爬取速度太快，触发目标网页的反爬虫机制
 // 每100毫秒执行一次fetch
 // 所有的worker都会使用同一个rateLimiter，worker总数由engine中的WorkerCount指定
-var rateLimiter = time.Tick(10 * time.Millisecond)
+var rateLimiter = time.Tick(time.Second / config.Qps)
 
 // 根据url访问页面，并返回网页内容
 func Fetch(url string) ([]byte, error) {
